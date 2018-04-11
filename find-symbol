@@ -1,0 +1,30 @@
+#!/bin/bash
+
+STR_H=32
+CHUNK_W=8
+CHUNK_N=4
+CHUNK_FN_BASE=chunk-
+
+chunk_l=$1
+chunk_r=$(($chunk_l+$CHUNK_N-1))
+chunk_r_fn=$CHUNK_FN_BASE$chunk_r.gif
+
+[[ ! -e $chunk_r_fn ]] && echo Error: $chunk_r_fn does not exist && exit
+
+sym_found=n
+
+while [[ "$sym_found" != "y" ]]; do
+	echo -n "Chunks $chunk_l-$chunk_r. Enter 'y' if you see a symbol: "
+	chunk_list=$(seq $chunk_l $chunk_r)
+	montage -tile ${CHUNK_N}x1 -geometry ${CHUNK_W}x${STR_H}+0+0 \
+		$(for i in $chunk_list; do echo $CHUNK_FN_BASE$i.gif; done) \
+		find-symbol.gif
+	display -resize 800% find-symbol.gif
+	read sym_found
+	chunk_l=$((${chunk_l}+1))
+	chunk_r=$((${chunk_r}+1))
+	chunk_r_fn=$CHUNK_FN_BASE$chunk_r.gif
+	[[ ! -e $chunk_r_fn ]] && break
+done
+
+
