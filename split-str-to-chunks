@@ -1,0 +1,31 @@
+#!/bin/bash
+
+STR_H=32
+CHUNK_W=8
+CHUNK_FN_BASE=chunk-
+
+str_fn=$1
+
+if [[ -z $str_fn ]]; then
+	echo Error: no file name supplied
+	exit
+fi
+
+str_h=$(identify -format "%h" $str_fn)
+str_w=$(identify -format "%w" $str_fn)
+
+echo ${str_h}x${str_w}
+
+if [[ $str_h -ne $STR_H ]]; then
+	echo Error: $str_fn height $str_h != $STR_H
+	exit
+fi
+
+chunk_cnt=$(($str_w / $CHUNK_W - 1))
+
+echo $chunk_cnt
+
+for i in $(seq $chunk_cnt); do
+	convert -crop ${CHUNK_W}x${STR_H}+$((${CHUNK_W}*($i-1))) +repage \
+		${str_fn} ${CHUNK_FN_BASE}$i.gif
+done
