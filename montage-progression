@@ -1,0 +1,28 @@
+#!/bin/bash
+
+CHUNK_H=32
+CHUNK_W=4
+TILE_CNT=12
+CHUNK_FNB=chunk-
+MONTAGE_FN=montage.gif
+WHITESPACE_FN=whitespace-4x32.gif
+
+start_chunk=$1
+[[ -z "$start_chunk" ]] && echo "Missing start_chunk parameter" && exit
+	
+for i in $(seq $TILE_CNT); do
+	chunk_list=""
+	for j in $(seq $start_chunk $(($start_chunk+$i-1))); do
+		chunk_list="$chunk_list $CHUNK_FNB$j.gif"
+	done
+	chunk_list="$chunk_list $(yes $WHITESPACE_FN | head -n $(($TILE_CNT-$i)))"
+	montage_list="$montage_list $chunk_list"
+done
+
+montage -tile ${TILE_CNT}x${TILE_CNT} \
+	-geometry ${CHUNK_W}x${CHUNK_H}+0+0 \
+	-border 1 \
+	$montage_list \
+	$MONTAGE_FN
+display -resize 200% $MONTAGE_FN
+
